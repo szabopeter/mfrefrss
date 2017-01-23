@@ -5,6 +5,7 @@ import htmllib
 import formatter
 import urlparse
 import urllib2
+import re
 
 rsstemplate = """<?xml version="1.0" encoding="utf-8"?>
 <rss version="2.0" xmlns:itunes="http://www.itunes.com/DTDs/Podcast-1.0.dtd" xmlns:media="http://search.yahoo.com/mrss/">
@@ -12,7 +13,7 @@ rsstemplate = """<?xml version="1.0" encoding="utf-8"?>
 <channel>
 <title>Mátyásföldi istentiszteletek 2017</title>
 <description>Mátyásföldi istentiszteletek 2017</description>
-<itunes:author>Szabó Péter</itunes:author>
+<itunes:author>matyasfoldiref.hu</itunes:author>
 <link>http://www.matyasfoldiref.hu/2017.-evi</link>
 <itunes:image href="http://www.matyasfoldiref.hu/matyasfoldiref-theme/images/banner/banner1200.jpg" />
 <!--pubDate> Sun, 09 Oct 2005 21:00:00 PST </pubDate-->
@@ -26,8 +27,8 @@ rsstemplate = """<?xml version="1.0" encoding="utf-8"?>
 itemtemplate = """    <item>
     <title><!--title--></title>
     <description><!--description--></description>
-    <itunes:author> matyasfoldiref.hu </itunes:author>
-    <!--pubDate> Thu, 16 Jun 2005 5:00:00 PST </pubDate-->
+    <itunes:author>matyasfoldiref.hu</itunes:author>
+    <pubDate><!--pubdate--></pubDate>
     <enclosure url="<!--url-->" type="audio/mpeg" />
     </item>"""
 
@@ -47,8 +48,8 @@ class linkcollector(object):
         parser = htmllib.HTMLParser(formatter.NullFormatter())
         parser.start_a = collect_link
 
-        #f = urllib2.urlopen(pageurl)
-        f = open('2017.-evi')
+        f = urllib2.urlopen(pageurl)
+        #f = open('2017.-evi')
         data = f.read()
         f.close()
 
@@ -60,12 +61,24 @@ lc = linkcollector(pageurl)
 collected_links = lc.collect()
 
 items = []
-for cl in collected_links:
+for url in collected_links:
+    infopart = re.findall('2017.*mp3', url)
+    if infopart:
+        infopart = infopart[0]
+        dt = infopart[0:4] + '-' + infopart[4:6] + '-' + infopart[6:8]
+    else:
+        infopart = url
+        dt = '2017-01-01'
     item = itemtemplate
-    item = item.replace('<!--title-->', cl)
-    item = item.replace('<!--description-->', cl)
-    item = item.replace('<!--url-->', cl)
-    items.append(item)
+    item = item.replace('<!--title-->', infopart)
+    item = item.replace('<!--description-->', url)
+    item = item.replace('<!--url-->', url)
+    item = item.replace('<!--pubdate-->', dt)
+
+    items.append({'dt': dt, 'item': item})
+
+items.sort(key=lambda x:x['dt'])
+items = [ item['item'] for item in items ]
 
 rss = rsstemplate.replace('<!--items-->', "\n".join(items))
 
