@@ -11,14 +11,14 @@ rsstemplate = """<?xml version="1.0" encoding="utf-8"?>
 <rss version="2.0" xmlns:itunes="http://www.itunes.com/DTDs/Podcast-1.0.dtd" xmlns:media="http://search.yahoo.com/mrss/">
 
 <channel>
-<title>Mátyásföldi istentiszteletek 2017</title>
-<description>Mátyásföldi istentiszteletek 2017</description>
+<title>Mátyásföldi istentiszteletek 2018</title>
+<description>Mátyásföldi istentiszteletek 2018</description>
 <itunes:author>matyasfoldiref.hu</itunes:author>
-<link>http://www.matyasfoldiref.hu/2017.-evi</link>
+<link>http://www.matyasfoldiref.hu/2018.-evi</link>
 <itunes:image href="http://www.matyasfoldiref.hu/matyasfoldiref-theme/images/banner/banner1200.jpg" />
 <!--pubDate> Sun, 09 Oct 2005 21:00:00 PST </pubDate-->
 <language>hu-HU</language>
-<copyright>Copyright 2017 Cinkota-Mátyásföldi Református Egyházközség </copyright>
+<copyright>Copyright 2018 Cinkota-Mátyásföldi Református Egyházközség </copyright>
 
 <!--items-->
 </channel>
@@ -49,26 +49,26 @@ class linkcollector(object):
         parser.start_a = collect_link
 
         f = urllib2.urlopen(pageurl)
-        #f = open('2017.-evi')
+        #f = open('2018.-evi')
         data = f.read()
         f.close()
 
         parser.feed(data)
         return collected_links
 
-pageurl = 'http://www.matyasfoldiref.hu/2017.-evi'
+pageurl = 'http://www.matyasfoldiref.hu/2018.-evi'
 lc = linkcollector(pageurl)
 collected_links = lc.collect()
 
 items = []
 for url in collected_links:
-    infopart = re.findall('2017.*mp3', url)
+    infopart = re.findall('2018.*mp3', url)
     if infopart:
         infopart = infopart[0]
         dt = infopart[0:4] + '-' + infopart[4:6] + '-' + infopart[6:8]
     else:
         infopart = url
-        dt = '2017-01-01'
+        dt = '2018-01-01'
     item = itemtemplate
     item = item.replace('<!--title-->', infopart)
     item = item.replace('<!--description-->', url)
